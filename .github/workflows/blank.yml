@@ -1,7 +1,7 @@
-name: Build and Upload Kali Image
+name: Build Kali Image
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Allows you to manually trigger this workflow
 
 jobs:
   build:
@@ -10,21 +10,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Set Tag Version
-        id: tag_version
-        run: |
-          TAG_NAME=v1.0-$(date +'%Y%m%d%H%M%S')
-          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
-      
-      - name: Create Git Tag
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git tag $TAG_NAME
-          git push origin $TAG_NAME
-        env:
-          TAG_NAME: ${{ env.TAG_NAME }}
 
       - name: Download Kali Image
         run: wget https://kali.download/cloud-images/kali-2024.3/kali-linux-2024.3-cloud-genericcloud-amd64.tar.xz
@@ -35,7 +20,8 @@ jobs:
       - name: Compress Image to gzip
         run: gzip -c disk.raw > disk.raw.gz
 
-      - name: Upload to Release
-        uses: softprops/action-gh-release@v1
+      - name: Upload Image as Artifact
+        uses: actions/upload-artifact@v2
         with:
-          files: disk.raw.gz
+          name: kali-disk-image
+          path: disk.raw.gz
