@@ -21,7 +21,7 @@ jobs:
         run: gzip -c disk.raw > disk.raw.gz
 
       - name: Upload Image as Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: kali-disk-image
           path: disk.raw.gz
