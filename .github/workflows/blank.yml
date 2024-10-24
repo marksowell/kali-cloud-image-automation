@@ -65,11 +65,10 @@ jobs:
           -H "Authorization: Bearer $DIGITALOCEAN_ACCESS_TOKEN" \
           -H "Content-Type: application/json" \
           -d "{
-                \"name\": \"Kali from GitHub Action\",
+                \"name\": \"Kali from GitHub Action ${{ env.NEW_VERSION }}\",
                 \"url\": \"https://github.com/${{ github.repository }}/releases/download/${{ env.NEW_VERSION }}/disk.raw.gz\",
                 \"distribution\": \"Debian\",
                 \"region\": \"${{ env.REGION }}\",
-                \"architecture\": \"x86_64\",
-                \"description\": \"Custom Kali Linux image\",
+                \"description\": \"Kali Linux\",
                 \"tags\": [\"kali\"]
               }"
