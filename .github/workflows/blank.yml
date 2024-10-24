@@ -20,9 +20,12 @@ jobs:
       - name: Compress Image to gzip
         run: gzip -c disk.raw > disk.raw.gz
 
-      - name: Upload Image as Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: kali-disk-image
-          path: disk.raw.gz
-          compression-level: 0
+      - name: Commit the Disk Image to the Repository
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add disk.raw.gz
+          git commit -m "Add built Kali disk image"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
