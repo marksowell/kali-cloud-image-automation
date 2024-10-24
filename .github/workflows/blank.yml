@@ -1,4 +1,4 @@
-name: Convert and Upload Kali Generic Cloud Image to DigitalOcean
+name: Kali Linux to DigitalOcean
 
 on:
   workflow_dispatch:
@@ -11,11 +11,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Fetch Latest Kali Version
+        id: fetch_version
+        run: |
+          # Fetch the current version of the amd64.tar.xz file from the Kali cloud images directory
+          URL=$(curl -s https://kali.download/cloud-images/current/ | grep -oP 'https://kali.download/cloud-images/current/kali-linux-\d+\.\d+-cloud-genericcloud-amd64.tar.xz' | head -n 1)
+          VERSION=$(echo $URL | grep -oP '\d+\.\d+')
+          echo "KALI_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "IMAGE_URL=$URL" >> $GITHUB_ENV
+
       - name: Download Kali Image
-        run: wget https://kali.download/cloud-images/kali-2024.3/kali-linux-2024.3-cloud-genericcloud-amd64.tar.xz
+        run: wget ${{ env.IMAGE_URL }}
 
       - name: Extract Image
-        run: tar -xvf kali-linux-2024.3-cloud-genericcloud-amd64.tar.xz
+        run: tar -xvf kali-linux-${{ env.KALI_VERSION }}-cloud-genericcloud-amd64.tar.xz
 
       - name: Compress Image to gzip
         run: gzip -c disk.raw > disk.raw.gz
@@ -31,9 +40,9 @@ jobs:
 
       - name: Increment release version
         run: |
-          MAJOR_VERSION=$(echo $VERSION | cut -d. -f1 | cut -c2-)  # Extract major version
-          NEXT_MAJOR_VERSION=$((MAJOR_VERSION + 1))  # Increment major version
-          NEW_VERSION="v$NEXT_MAJOR_VERSION.0.0"  # Reset minor and patch versions
+          MAJOR_VERSION=$(echo $VERSION | cut -d. -f1 | cut -c2-)
+          NEXT_MAJOR_VERSION=$((MAJOR_VERSION + 1))
+          NEW_VERSION="v$NEXT_MAJOR_VERSION.0.0"
           echo $NEW_VERSION > version.txt
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
@@ -42,17 +51,17 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add version.txt
-          git commit -m "Increment release version to $NEW_VERSION"
+          git commit -m "Update version to ${{ env.NEW_VERSION }} - Kali ${{ env.KALI_VERSION }}"
           git push
 
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@v2  # Replacement action for uploading release assets
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.NEW_VERSION }}  # Use the new version as the tag name
-          files: ./disk.raw.gz  # File(s) to upload to the release
+          tag_name: ${{ env.NEW_VERSION }}
+          files: ./disk.raw.gz
           draft: false
           prerelease: false
 
@@ -65,7 +74,7 @@ jobs:
           -H "Authorization: Bearer $DIGITALOCEAN_ACCESS_TOKEN" \
           -H "Content-Type: application/json" \
           -d "{
-                \"name\": \"Kali from GitHub Actions ${{ env.NEW_VERSION }}\",
+                \"name\": \"Kali ${{ env.KALI_VERSION }} from GitHub Actions\",
                 \"url\": \"https://github.com/${{ github.repository }}/releases/download/${{ env.NEW_VERSION }}/disk.raw.gz\",
                 \"distribution\": \"Debian\",
                 \"region\": \"${{ env.REGION }}\",
