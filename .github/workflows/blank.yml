@@ -1,0 +1,26 @@
+name: Build and Upload Kali Image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Download Kali Image
+        run: wget https://kali.download/cloud-images/kali-2024.3/kali-linux-2024.3-cloud-genericcloud-amd64.tar.xz
+
+      - name: Extract Image
+        run: tar -xvf kali-linux-2024.3-cloud-genericcloud-amd64.tar.xz
+
+      - name: Compress Image to gzip
+        run: gzip -c disk.raw > disk.raw.gz
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: disk.raw.gz
