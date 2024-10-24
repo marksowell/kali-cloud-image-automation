@@ -1,4 +1,4 @@
-name: Build and Upload Kali Image to DigitalOcean
+name: Convert and Upload Kali Generic Cloud Image to DigitalOcean
 
 on:
   workflow_dispatch:
