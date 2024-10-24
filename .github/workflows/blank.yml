@@ -14,11 +14,11 @@ jobs:
       - name: Fetch Latest Kali Version
         id: fetch_version
         run: |
-          # Fetch the current version of the amd64.tar.xz file from the Kali cloud images directory
-          URL=$(curl -s https://kali.download/cloud-images/current/ | grep -oP 'https://kali.download/cloud-images/current/kali-linux-\d+\.\d+-cloud-genericcloud-amd64.tar.xz' | head -n 1)
-          VERSION=$(echo $URL | grep -oP '\d+\.\d+')
+          URL=$(curl -s https://kali.download/cloud-images/current/ | grep -oE 'kali-linux-[0-9]+\.[0-9]+-cloud-genericcloud-amd64.tar.xz' | head -n 1)
+          FULL_URL="https://kali.download/cloud-images/current/$URL"
+          VERSION=$(echo $URL | grep -oE '[0-9]+\.[0-9]+')
           echo "KALI_VERSION=$VERSION" >> $GITHUB_ENV
-          echo "IMAGE_URL=$URL" >> $GITHUB_ENV
+          echo "IMAGE_URL=$FULL_URL" >> $GITHUB_ENV
 
       - name: Download Kali Image
         run: wget ${{ env.IMAGE_URL }}
