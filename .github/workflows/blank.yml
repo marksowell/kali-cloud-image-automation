@@ -53,7 +53,7 @@ jobs:
                 \"name\": \"Kali from GitHub Action\",
                 \"url\": \"https://github.com/${{ github.repository }}/releases/download/v1.0.0/disk.raw.gz\",
                 \"distribution\": \"Debian\",
-                \"region\": \"$REGION\",
+                \"regions\": [\"${{ env.REGION }}\"],
                 \"architecture\": \"x86_64\",
                 \"description\": \"Custom Kali Linux image\",
                 \"tags\": [\"kali\"]
