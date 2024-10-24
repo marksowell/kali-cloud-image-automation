@@ -20,11 +20,26 @@ jobs:
       - name: Compress Image to gzip
         run: gzip -c disk.raw > disk.raw.gz
 
-      - name: Update and Install Nginx
-        run: |
-          sudo apt update && sudo apt install -y nginx
-          sudo mv disk.raw.gz /var/www/html/
-          sudo systemctl start nginx
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: kali-image-$(date +%Y%m%d)
+          release_name: Kali Linux Image $(date +%Y%m%d)
+          draft: false
+          prerelease: false
+
+      - name: Upload Compressed Image to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./disk.raw.gz
+          asset_name: disk.raw.gz
+          asset_content_type: application/gzip
 
       - name: Upload to DigitalOcean
         env:
@@ -36,7 +51,7 @@ jobs:
           -H "Content-Type: application/json" \
           -d "{
                 \"name\": \"Kali from GitHub Action\",
-                \"url\": \"http://localhost/disk.raw.gz\",
+                \"url\": \"https://github.com/${{ github.repository }}/releases/download/kali-image-$(date +%Y%m%d)/disk.raw.gz\",
                 \"distribution\": \"Debian\",
                 \"region\": \"$REGION\",
                 \"architecture\": \"x86_64\",
