@@ -1,15 +1,15 @@
-name: Build Kali Image
+name: Build and Upload Kali Image to DigitalOcean
 
 on:
-  workflow_dispatch: # Allows you to manually trigger this workflow
+  workflow_dispatch:
 
 jobs:
-  build:
+  build-and-upload:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Download Kali Image
         run: wget https://kali.download/cloud-images/kali-2024.3/kali-linux-2024.3-cloud-genericcloud-amd64.tar.xz
@@ -20,12 +20,26 @@ jobs:
       - name: Compress Image to gzip
         run: gzip -c disk.raw > disk.raw.gz
 
-      - name: Commit the Disk Image to the Repository
+      - name: Start Nginx Server to Serve Image
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add disk.raw.gz
-          git commit -m "Add built Kali disk image"
-          git push origin main
+          apt update && apt install -y nginx
+          mv disk.raw.gz /var/www/html/
+          systemctl start nginx
+
+      - name: Upload to DigitalOcean
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          REGION: ${{ secrets.REGION }}
+        run: |
+          curl -X POST "https://api.digitalocean.com/v2/images" \
+          -H "Authorization: Bearer $DIGITALOCEAN_ACCESS_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "{
+                \"name\": \"Kali from GitHub Action\",
+                \"url\": \"http://localhost/disk.raw.gz\",
+                \"distribution\": \"Debian\",
+                \"region\": \"$REGION\",
+                \"architecture\": \"x86_64\",
+                \"description\": \"Custom Kali Linux image\",
+                \"tags\": [\"kali\"]
+              }"
