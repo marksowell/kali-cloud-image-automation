@@ -20,11 +20,11 @@ jobs:
       - name: Compress Image to gzip
         run: gzip -c disk.raw > disk.raw.gz
 
-      - name: Start Nginx Server to Serve Image
+      - name: Update and Install Nginx
         run: |
-          apt update && apt install -y nginx
-          mv disk.raw.gz /var/www/html/
-          systemctl start nginx
+          sudo apt update && sudo apt install -y nginx
+          sudo mv disk.raw.gz /var/www/html/
+          sudo systemctl start nginx
 
       - name: Upload to DigitalOcean
         env:
