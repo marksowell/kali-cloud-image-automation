@@ -25,4 +25,4 @@ jobs:
         with:
           name: kali-disk-image
           path: disk.raw.gz
-          compression: none
+          compression-level: 0
