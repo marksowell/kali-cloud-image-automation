@@ -68,9 +68,8 @@ jobs:
       - name: Upload to DigitalOcean
         env:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-          REGION: ${{ secrets.REGION }}
+          #REGION: ${{ secrets.REGION }}
         run: |
-          echo "Region is set to: ${{ env.REGION }}"
           curl -X POST "https://api.digitalocean.com/v2/images" \
           -H "Authorization: Bearer $DIGITALOCEAN_ACCESS_TOKEN" \
           -H "Content-Type: application/json" \
@@ -78,7 +77,7 @@ jobs:
                 \"name\": \"Kali Linux ${{ env.KALI_VERSION }} from GitHub Actions\",
                 \"url\": \"https://github.com/${{ github.repository }}/releases/download/${{ env.NEW_VERSION }}/disk.raw.gz\",
                 \"distribution\": \"Debian\",
-                \"region\": \"${{ env.REGION }}\",
+                \"region\": \"nyc1\",
                 \"description\": \"Kali Linux\",
                 \"tags\": [\"kali\"]
               }"
