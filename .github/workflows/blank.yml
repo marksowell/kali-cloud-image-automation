@@ -73,7 +73,7 @@ jobs:
           DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
           REGION: ${{ secrets.REGION }}
         run: |
-          curl -X POST "https://api.digitalocean.com/v2/images" \
+          RESPONSE=$(curl -X POST "https://api.digitalocean.com/v2/images" \
           -H "Authorization: Bearer $DIGITALOCEAN_ACCESS_TOKEN" \
           -H "Content-Type: application/json" \
           -d "{
@@ -83,4 +83,17 @@ jobs:
                 \"region\": \"${{ env.REGION }}\",
                 \"description\": \"Kali Linux\",
                 \"tags\": [\"kali\"]
-              }"
+              }")
+          IMAGE_ID=$(echo $RESPONSE | jq -r '.image.id')
+          sleep 60
+          for i in {1..5}; do
+            STATUS=$(curl -X GET "https://api.digitalocean.com/v2/images/$IMAGE_ID" \
+            -H "Authorization: Bearer $DIGITALOCEAN_ACCESS_TOKEN" \
+            -H "Content-Type: application/json" | jq -r '.image.status')
+            echo "Image status: $STATUS"
+            if [ "$STATUS" == "available" ]; then
+              echo "Image is available for use."
+              break
+            fi
+            sleep 60
+          done
