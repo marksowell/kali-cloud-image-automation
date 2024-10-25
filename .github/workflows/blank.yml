@@ -26,8 +26,8 @@ jobs:
       - name: Extract Image
         run: tar -xvf kali-linux-${{ env.KALI_VERSION }}-cloud-genericcloud-amd64.tar.xz
 
-      #- name: Compress Image to gzip
-      #  run: gzip -c disk.raw > disk.raw.gz
+      - name: Compress Image to gzip
+        run: gzip -c disk.raw > disk.raw.gz
 
       - name: Read current release version
         id: get_version
@@ -61,8 +61,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.NEW_VERSION }}
-          #files: ./disk.raw.gz
-          files: ./disk.raw
+          files: ./disk.raw.gz
           draft: false
           prerelease: false
 
@@ -77,7 +76,7 @@ jobs:
           -H "Content-Type: application/json" \
           -d "{
                 \"name\": \"Kali Linux ${{ env.KALI_VERSION }} from GitHub Actions\",
-                \"url\": \"https://github.com/${{ github.repository }}/releases/download/${{ env.NEW_VERSION }}/disk.raw\",
+                \"url\": \"https://github.com/${{ github.repository }}/releases/download/${{ env.NEW_VERSION }}/disk.raw.gz\",
                 \"distribution\": \"Debian\",
                 \"region\": \"${{ env.REGION }}\",
                 \"description\": \"Kali Linux\",
