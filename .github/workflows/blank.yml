@@ -77,7 +77,7 @@ jobs:
                 \"name\": \"Kali Linux ${{ env.KALI_VERSION }} from GitHub Actions\",
                 \"url\": \"https://github.com/${{ github.repository }}/releases/download/${{ env.NEW_VERSION }}/disk.raw.gz\",
                 \"distribution\": \"Debian\",
-                \"region\": \"$REGION\",
+                \"region\": \"${{ env.REGION }}\",
                 \"description\": \"Kali Linux\",
                 \"tags\": [\"kali\"]
               }"
