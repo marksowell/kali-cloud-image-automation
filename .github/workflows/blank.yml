@@ -84,7 +84,9 @@ jobs:
                 \"description\": \"Kali Linux\",
                 \"tags\": [\"kali\"]
               }")
+          echo "DigitalOcean API Response: $RESPONSE"  # Log the full response
           IMAGE_ID=$(echo $RESPONSE | jq -r '.image.id')
+          echo "Extracted Image ID: $IMAGE_ID"  # Log extracted image ID
           sleep 60
           for i in {1..5}; do
             STATUS=$(curl -X GET "https://api.digitalocean.com/v2/images/$IMAGE_ID" \
